@@ -111,4 +111,8 @@ public class ZonaRiscoService {
     private ZonaRiscoResponseDTO toResponse(ZonaRisco z) {
         return new ZonaRiscoResponseDTO(z.getId(), z.getNome(), z.getCidade(), z.getEstado(), z.getNivelRiscoAtual());
     }
+
+    public ZonaRisco findEntityById(UUID id) {
+        return zonaRiscoRepository.findById(id).orElse(null);
+    }
 }

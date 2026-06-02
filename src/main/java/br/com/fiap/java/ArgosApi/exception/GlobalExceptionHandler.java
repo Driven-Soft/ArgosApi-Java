@@ -1,7 +1,5 @@
-package br.com.fiap.java.ArgosApi.exception;
-
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,18 +15,26 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-                                                                  HttpHeaders headers,
-                                                                  HttpStatus status,
-                                                                  WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+
         Map<String, Object> body = new HashMap<>();
-        var errors = ex.getBindingResult().getFieldErrors()
+
+        var errors = ex.getBindingResult()
+                .getFieldErrors()
                 .stream()
-                .map(e -> Map.of("field", e.getField(), "message", e.getDefaultMessage()))
+                .map(e -> Map.of(
+                        "field", e.getField(),
+                        "message", e.getDefaultMessage()
+                ))
                 .collect(Collectors.toList());
 
         body.put("status", status.value());
         body.put("errors", errors);
+
         return new ResponseEntity<>(body, headers, status);
     }
 
@@ -37,6 +43,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         Map<String, Object> body = new HashMap<>();
         body.put("error", ex.getMessage());
         body.put("status", 500);
+
         return ResponseEntity.status(500).body(body);
     }
 }

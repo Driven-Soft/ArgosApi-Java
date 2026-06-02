@@ -11,15 +11,25 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import br.com.fiap.java.ArgosApi.service.NasaService;
+import br.com.fiap.java.ArgosApi.service.NasaService.NasaImageResult;
+import br.com.fiap.java.ArgosApi.service.RainMonitoringService;
+import org.springframework.http.MediaType;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/zonas")
 public class ZonaRiscoController {
 
     private final ZonaRiscoService zonaRiscoService;
+    private final NasaService nasaService;
+    private final RainMonitoringService rainMonitoringService;
 
-    public ZonaRiscoController(ZonaRiscoService zonaRiscoService) {
+    public ZonaRiscoController(ZonaRiscoService zonaRiscoService, NasaService nasaService, RainMonitoringService rainMonitoringService) {
         this.zonaRiscoService = zonaRiscoService;
+        this.nasaService = nasaService;
+        this.rainMonitoringService = rainMonitoringService;
     }
 
     @GetMapping
@@ -65,5 +75,43 @@ public class ZonaRiscoController {
     public ResponseEntity<Object> analisarRisco(@PathVariable UUID id) {
         var result = zonaRiscoService.analisarRisco(id);
         return result == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/dashboard/{id}")
+    public ResponseEntity<Object> dashboard(@PathVariable UUID id) {
+        var zDto = zonaRiscoService.buscarPorId(id);
+        if (zDto == null) return ResponseEntity.notFound().build();
+
+        var z = zonaRiscoService.findEntityById(id);
+        if (z == null) return ResponseEntity.notFound().build();
+
+        // chuva
+        double chuva = rainMonitoringService.getRainMm(z.getLatitude(), z.getLongitude());
+
+        // apod
+        var apod = nasaService.getApod();
+
+        var imageLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ZonaRiscoController.class).getEarthImage(id, 0.15)).withRel("nasaEarthImage");
+
+        return ResponseEntity.ok(java.util.Map.of(
+                "zona", z,
+                "chuva24h", chuva,
+                "apod", apod,
+                "nasaEarthImage", imageLink.getHref()
+        ));
+    }
+
+    @GetMapping(value = "/{id}/nasa-earth-image")
+    public ResponseEntity<byte[]> getEarthImage(@PathVariable UUID id, @RequestParam(defaultValue = "0.15") double dim) {
+        var zDto = zonaRiscoService.buscarPorId(id);
+        if (zDto == null) return ResponseEntity.notFound().build();
+
+        var z = zonaRiscoService.findEntityById(id);
+        if (z == null) return ResponseEntity.notFound().build();
+
+        NasaImageResult img = nasaService.getEarthImageBytes(z.getLatitude(), z.getLongitude(), dim);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(img.contentType));
+        return new ResponseEntity<>(img.bytes, headers, HttpStatus.OK);
     }
 }
