@@ -1,4 +1,4 @@
-# Argos API
+# Argos API — DisasterWatch
 
 API REST para monitoramento de desastres naturais, desenvolvida com Java 21 e Spring Boot 4 como parte da Global Solution FIAP.
 
@@ -9,7 +9,7 @@ Integra dados de chuva em tempo real via **Open-Meteo** e imagens de satélite v
 ## 👥 Integrantes
 
 | Nome | RM |
-| --- | --- |
+|---|---|
 | Felipe Bezerra Beatrici | RM 564723 |
 | Max Hayashi Batista | RM 563717 |
 | Henrique Cunha Torres | RM 565119 |
@@ -20,9 +20,9 @@ Integra dados de chuva em tempo real via **Open-Meteo** e imagens de satélite v
 
 | Recurso | URL |
 |---|---|
-| **Deploy (Render)** | `https://argosapi-java.onrender.com/` |
-| **Swagger UI** | `https://argosapi-java.onrender.com/swagger-ui.html` |
-| **API Docs (JSON)** | `https://argosapi-java.onrender.com/v3/api-docs` |
+| **Deploy (Render)** | https://argosapi-java.onrender.com/ |
+| **Swagger UI** | https://argosapi-java.onrender.com/swagger-ui.html |
+| **API Docs (JSON)** | https://argosapi-java.onrender.com/v3/api-docs |
 | **Vídeo de Apresentação** | `https://youtube.com/` ← substituir |
 
 ---
@@ -49,16 +49,21 @@ src/main/java/br/com/fiap/java/ArgosApi/
 ├── dto/             # Records de request e response
 │   ├── request/
 │   └── response/
-├── entity/          # Entidades JPA (inclui @Embeddable Localizacao)
+├── entity/          # Entidades JPA
 ├── exception/       # GlobalExceptionHandler + ResourceNotFoundException
 ├── repository/      # Interfaces JpaRepository
 ├── security/        # JWT filter, SecurityConfig, UserDetailsService
 └── service/         # Regras de negócio + integração com APIs externas
 ```
 
-**Modelagem Avançada:**
-- `@Embeddable Localizacao` (latitude + longitude) utilizada em `ZonaRisco` e `Ocorrencia`
-- `@AttributeOverrides` em `Ocorrencia` para diferenciar colunas
+### 🗂️ Modelagem Avançada (todos os 4 requisitos atendidos)
+
+| Requisito | Implementação |
+|---|---|
+| **Herança** | `AnaliseRiscoDetalhada extends AnaliseRisco` com `@Inheritance(SINGLE_TABLE)` e `@DiscriminatorValue` |
+| **Chave Composta** | `AlertaZonaId` com `@EmbeddedId` (chave: `zonaRiscoId` + `nivelAlerta`) em `AlertaZona` |
+| **Embedded** | `Localizacao` (`@Embeddable`) com latitude e longitude, usado em `ZonaRisco` e `Ocorrencia` com `@AttributeOverrides` |
+| **Múltiplas Tabelas** | `usuarios`, `zonas_risco`, `alertas`, `ocorrencias`, `comentarios_ocorrencia`, `analises_risco`, `alertas_zona`, `tipos_ocorrencia` |
 
 ---
 
@@ -98,8 +103,8 @@ export JWT_SECRET=meu_secret_local
 ./mvnw spring-boot:run
 ```
 
-A API sobe em `http://localhost:8080`.
-Swagger disponível em `http://localhost:8080/swagger-ui.html`.
+A API sobe em `http://localhost:8080`.  
+Swagger disponível em `http://localhost:8080/swagger-ui.html`.  
 H2 Console em `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:mem:argosdb`).
 
 ### Docker
@@ -150,6 +155,13 @@ docker run -p 8080:8080 \
 | PUT | `/api/alertas/{id}` | Atualizar alerta |
 | DELETE | `/api/alertas/{id}` | Deletar alerta |
 | PATCH | `/api/alertas/{id}/status` | Ativar/desativar |
+
+### Configurações de Alerta por Zona *(chave composta)*
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/api/zonas/{zonaId}/configuracoes-alerta` | Listar configurações da zona |
+| POST | `/api/zonas/{zonaId}/configuracoes-alerta` | Criar/atualizar config (zonaId + nivelAlerta) |
+| DELETE | `/api/zonas/{zonaId}/configuracoes-alerta/{nivelAlerta}` | Remover pela chave composta |
 
 ### Ocorrências
 | Método | Rota | Descrição |

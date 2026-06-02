@@ -17,10 +17,10 @@ public class RainMonitoringService {
     private final ObjectMapper objectMapper;
     private final String apiUrl;
 
-    public RainMonitoringService(ObjectMapper objectMapper,
-                                 @Value("${weather.api.base-url:https://api.open-meteo.com/v1/forecast}") String apiUrl) {
+    public RainMonitoringService(
+            @Value("${weather.api.base-url:https://api.open-meteo.com/v1/forecast}") String apiUrl) {
         this.httpClient = HttpClient.newHttpClient();
-        this.objectMapper = objectMapper;
+        this.objectMapper = new ObjectMapper();
         this.apiUrl = apiUrl;
     }
 
@@ -44,7 +44,6 @@ public class RainMonitoringService {
             Double value = apiResponse.daily.precipitation_sum.get(0);
             return value != null ? value : 0.0;
         } catch (Exception ex) {
-            // Retorna 0 se API estiver indisponivel
             return 0.0;
         }
     }

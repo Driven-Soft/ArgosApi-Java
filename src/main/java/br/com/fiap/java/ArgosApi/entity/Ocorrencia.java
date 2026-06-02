@@ -43,7 +43,6 @@ public class Ocorrencia {
     @JoinColumn(name = "zona_risco_id")
     private ZonaRisco zonaRisco;
 
-    /** Localizacao especifica da ocorrencia usando @Embedded */
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "latitude",  column = @Column(name = "ocorrencia_latitude")),

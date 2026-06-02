@@ -18,10 +18,9 @@ public class NasaService {
     private final ObjectMapper objectMapper;
     private final String apiKey;
 
-    public NasaService(ObjectMapper objectMapper,
-                       @Value("${nasa.api.key:DEMO_KEY}") String apiKey) {
+    public NasaService(@Value("${nasa.api.key:DEMO_KEY}") String apiKey) {
         this.httpClient = HttpClient.newBuilder().build();
-        this.objectMapper = objectMapper;
+        this.objectMapper = new ObjectMapper();
         this.apiKey = apiKey;
     }
 

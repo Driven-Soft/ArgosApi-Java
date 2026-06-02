@@ -6,10 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Classe embeddable que agrupa latitude e longitude.
- * Satisfaz o requisito de modelagem avancada (@Embedded) do enunciado.
- */
 @Embeddable
 @Data
 @NoArgsConstructor
