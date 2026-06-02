@@ -22,12 +22,13 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     private static final String[] PUBLIC_ENDPOINTS = {
+            "/",
+            "/hello",
             "/api/auth/**",
             "/h2-console/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "/swagger-ui.html",
-            "/hello"
+            "/swagger-ui.html"
     };
 
     @Bean

@@ -1,4 +1,4 @@
-# Argos API — DisasterWatch
+# Argos API
 
 API REST para monitoramento de desastres naturais, desenvolvida com Java 21 e Spring Boot 4 como parte da Global Solution FIAP.
 
@@ -20,7 +20,7 @@ Integra dados de chuva em tempo real via **Open-Meteo** e imagens de satélite v
 
 | Recurso | URL |
 |---|---|
-| **Deploy (Render)** | https://argosapi-java.onrender.com/ |
+| **Deploy (Render)** | https://argosapi-java.onrender.com/hello |
 | **Swagger UI** | https://argosapi-java.onrender.com/swagger-ui.html |
 | **API Docs (JSON)** | https://argosapi-java.onrender.com/v3/api-docs |
 | **Vídeo de Apresentação** | `https://youtube.com/` ← substituir |
@@ -56,7 +56,7 @@ src/main/java/br/com/fiap/java/ArgosApi/
 └── service/         # Regras de negócio + integração com APIs externas
 ```
 
-### 🗂️ Modelagem Avançada (todos os 4 requisitos atendidos)
+### 🗂️ Modelagem Avançada
 
 | Requisito | Implementação |
 |---|---|
@@ -103,8 +103,8 @@ export JWT_SECRET=meu_secret_local
 ./mvnw spring-boot:run
 ```
 
-A API sobe em `http://localhost:8080`.  
-Swagger disponível em `http://localhost:8080/swagger-ui.html`.  
+A API sobe em `http://localhost:8080`.
+Swagger disponível em `http://localhost:8080/swagger-ui.html`.
 H2 Console em `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:mem:argosdb`).
 
 ### Docker

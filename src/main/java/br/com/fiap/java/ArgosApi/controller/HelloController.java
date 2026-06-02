@@ -8,7 +8,7 @@ public class HelloController {
 
     @GetMapping("/hello")
     public String hello() {
-        return "Spring Boot 4 no Render";
+        return "Seja bem vindo(a) ao Argos API!";
     }
 
 }
