@@ -28,28 +28,24 @@ public class RainMonitoringService {
         try {
             var uri = URI.create(String.format(
                     "%s?latitude=%s&longitude=%s&daily=precipitation_sum&past_days=1&timezone=auto",
-                    apiUrl,
-                    latitude,
-                    longitude
-            ));
+                    apiUrl, latitude, longitude));
 
             var request = HttpRequest.newBuilder(uri)
-                    .GET()
-                    .header("Accept", "application/json")
-                    .build();
+                    .GET().header("Accept", "application/json").build();
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
-                throw new IllegalStateException("Falha ao consultar API de clima: " + response.statusCode());
-            }
+            if (response.statusCode() != 200) return 0.0;
 
             var apiResponse = objectMapper.readValue(response.body(), OpenMeteoResponse.class);
-            if (apiResponse.daily == null || apiResponse.daily.precipitation_sum == null || apiResponse.daily.precipitation_sum.isEmpty()) {
-                return 0.0;
-            }
-            return apiResponse.daily.precipitation_sum.get(0);
+            if (apiResponse.daily == null
+                    || apiResponse.daily.precipitation_sum == null
+                    || apiResponse.daily.precipitation_sum.isEmpty()) return 0.0;
+
+            Double value = apiResponse.daily.precipitation_sum.get(0);
+            return value != null ? value : 0.0;
         } catch (Exception ex) {
-            throw new IllegalStateException("Erro ao consumir API de clima", ex);
+            // Retorna 0 se API estiver indisponivel
+            return 0.0;
         }
     }
 

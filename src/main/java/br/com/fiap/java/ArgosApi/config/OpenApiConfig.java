@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Configuration;
 
 @OpenAPIDefinition(
         info = @Info(
-                title = "Argos API",
+                title = "Argos API - DisasterWatch",
                 version = "v1",
-                description = "Documentação da API do DisasterWatch/Argos",
+                description = "API REST para monitoramento de zonas de risco, alertas e ocorrencias. Integra Open-Meteo e NASA.",
                 contact = @Contact(name = "Argos API Team", email = "support@fiap.com.br")
         ),
         security = {@SecurityRequirement(name = "bearerAuth")}
@@ -24,5 +24,4 @@ import org.springframework.context.annotation.Configuration;
         bearerFormat = "JWT"
 )
 @Configuration
-public class OpenApiConfig {
-}
+public class OpenApiConfig {}

@@ -2,7 +2,7 @@ package br.com.fiap.java.ArgosApi.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,36 +17,47 @@ import java.util.UUID;
 public class Ocorrencia {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "id", updatable = false, nullable = false)
+    @GeneratedValue
+    @UuidGenerator
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
+    @Column(nullable = false)
     private String titulo;
+
     private String descricao;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_ocorrencia_id")
     private TipoOcorrencia tipoOcorrencia;
 
     @Enumerated(EnumType.STRING)
-    private StatusOcorrencia status;
+    @Builder.Default
+    private StatusOcorrencia status = StatusOcorrencia.ABERTA;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "zona_risco_id")
     private ZonaRisco zonaRisco;
 
-    private Double latitude;
-    private Double longitude;
+    /** Localizacao especifica da ocorrencia usando @Embedded */
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "latitude",  column = @Column(name = "ocorrencia_latitude")),
+        @AttributeOverride(name = "longitude", column = @Column(name = "ocorrencia_longitude"))
+    })
+    private Localizacao localizacao;
+
     private LocalDateTime dataCriacao;
     private LocalDateTime dataAtualizacao;
     private LocalDateTime resolvidoEm;
 
-    @OneToMany(mappedBy = "ocorrencia", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "ocorrencia", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<ComentarioOcorrencia> comentarios;
 
     @PrePersist

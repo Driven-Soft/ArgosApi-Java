@@ -19,21 +19,22 @@ public class NasaService {
     private final String apiKey;
 
     public NasaService(ObjectMapper objectMapper,
-                       @Value("${nasa.api.key:}") String apiKey) {
+                       @Value("${nasa.api.key:DEMO_KEY}") String apiKey) {
         this.httpClient = HttpClient.newBuilder().build();
         this.objectMapper = objectMapper;
         this.apiKey = apiKey;
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getApod() {
         try {
-            var uri = URI.create(String.format("https://api.nasa.gov/planetary/apod?api_key=%s", apiKey));
+            var uri = URI.create("https://api.nasa.gov/planetary/apod?api_key=" + apiKey);
             var req = HttpRequest.newBuilder(uri).GET().header("Accept", "application/json").build();
             var resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-            if (resp.statusCode() != 200) throw new IllegalStateException("NASA APOD error: " + resp.statusCode());
+            if (resp.statusCode() != 200) return Map.of("error", "NASA APOD indisponivel");
             return objectMapper.readValue(resp.body(), Map.class);
         } catch (Exception ex) {
-            throw new IllegalStateException("Erro ao consultar NASA APOD", ex);
+            return Map.of("error", "Erro ao consultar NASA APOD: " + ex.getMessage());
         }
     }
 
@@ -42,11 +43,10 @@ public class NasaService {
             var uri = URI.create(String.format(
                     "https://api.nasa.gov/planetary/earth/imagery?lat=%s&lon=%s&dim=%s&api_key=%s",
                     lat, lon, dim, apiKey));
-
             var req = HttpRequest.newBuilder(uri).GET().build();
             var resp = httpClient.send(req, HttpResponse.BodyHandlers.ofByteArray());
-            if (resp.statusCode() != 200) throw new IllegalStateException("NASA Earth imagery error: " + resp.statusCode());
-
+            if (resp.statusCode() != 200)
+                throw new IllegalStateException("NASA Earth imagery error: " + resp.statusCode());
             String contentType = resp.headers().firstValue("Content-Type").orElse(MediaType.IMAGE_PNG_VALUE);
             return new NasaImageResult(resp.body(), contentType);
         } catch (Exception ex) {
@@ -54,13 +54,5 @@ public class NasaService {
         }
     }
 
-    public static class NasaImageResult {
-        public final byte[] bytes;
-        public final String contentType;
-
-        public NasaImageResult(byte[] bytes, String contentType) {
-            this.bytes = bytes;
-            this.contentType = contentType;
-        }
-    }
+    public record NasaImageResult(byte[] bytes, String contentType) {}
 }

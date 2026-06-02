@@ -2,8 +2,11 @@ package br.com.fiap.java.ArgosApi.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-public record AuthRequestDTO(
+public record RegisterRequestDTO(
+        @NotBlank String nome,
         @NotBlank @Email String email,
-        @NotBlank String senha
+        @NotBlank @Size(min = 6) String senha,
+        String telefone
 ) {}

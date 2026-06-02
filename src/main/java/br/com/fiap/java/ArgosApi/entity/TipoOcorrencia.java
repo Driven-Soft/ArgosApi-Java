@@ -2,7 +2,7 @@ package br.com.fiap.java.ArgosApi.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
@@ -15,13 +15,17 @@ import java.util.UUID;
 public class TipoOcorrencia {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "id", updatable = false, nullable = false)
+    @GeneratedValue
+    @UuidGenerator
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
+    @Column(nullable = false, unique = true)
     private String nome;
+
     private String descricao;
+
+    @Builder.Default
     private boolean ativo = true;
 
     @PrePersist

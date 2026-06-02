@@ -2,6 +2,7 @@ package br.com.fiap.java.ArgosApi.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.UUID;
 
 public record OcorrenciaRequestDTO(
@@ -11,5 +12,4 @@ public record OcorrenciaRequestDTO(
         @NotNull UUID zonaRiscoId,
         Double latitude,
         Double longitude
-) {
-}
+) {}

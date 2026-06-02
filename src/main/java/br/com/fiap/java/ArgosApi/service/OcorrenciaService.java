@@ -3,78 +3,91 @@ package br.com.fiap.java.ArgosApi.service;
 import br.com.fiap.java.ArgosApi.dto.request.OcorrenciaRequestDTO;
 import br.com.fiap.java.ArgosApi.dto.response.OcorrenciaResponseDTO;
 import br.com.fiap.java.ArgosApi.entity.*;
+import br.com.fiap.java.ArgosApi.exception.ResourceNotFoundException;
 import br.com.fiap.java.ArgosApi.repository.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class OcorrenciaService {
 
     private final OcorrenciaRepository ocorrenciaRepository;
     private final TipoOcorrenciaRepository tipoOcorrenciaRepository;
     private final ZonaRiscoRepository zonaRiscoRepository;
-
-    public OcorrenciaService(OcorrenciaRepository ocorrenciaRepository,
-                             TipoOcorrenciaRepository tipoOcorrenciaRepository,
-                             ZonaRiscoRepository zonaRiscoRepository) {
-        this.ocorrenciaRepository = ocorrenciaRepository;
-        this.tipoOcorrenciaRepository = tipoOcorrenciaRepository;
-        this.zonaRiscoRepository = zonaRiscoRepository;
-    }
+    private final UsuarioRepository usuarioRepository;
 
     public List<OcorrenciaResponseDTO> listarTodas() {
-        return ocorrenciaRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        return ocorrenciaRepository.findAll().stream().map(this::toResponse).toList();
     }
 
     public OcorrenciaResponseDTO buscarPorId(UUID id) {
-        return ocorrenciaRepository.findById(id).map(this::toResponse).orElse(null);
+        return toResponse(findOrThrow(id));
     }
 
     public OcorrenciaResponseDTO criar(OcorrenciaRequestDTO dto) {
-        Ocorrencia o = new Ocorrencia();
-        o.setTitulo(dto.titulo());
-        o.setDescricao(dto.descricao());
-        o.setLatitude(dto.latitude());
-        o.setLongitude(dto.longitude());
-        o.setDataCriacao(LocalDateTime.now());
+        var tipo = tipoOcorrenciaRepository.findById(dto.tipoOcorrenciaId())
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de ocorrencia nao encontrado"));
+        var zona = zonaRiscoRepository.findById(dto.zonaRiscoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Zona de risco nao encontrada"));
 
-        tipoOcorrenciaRepository.findById(dto.tipoOcorrenciaId()).ifPresent(o::setTipoOcorrencia);
-        zonaRiscoRepository.findById(dto.zonaRiscoId()).ifPresent(o::setZonaRisco);
+        var o = Ocorrencia.builder()
+                .titulo(dto.titulo())
+                .descricao(dto.descricao())
+                .tipoOcorrencia(tipo)
+                .zonaRisco(zona)
+                .localizacao(new Localizacao(dto.latitude(), dto.longitude()))
+                .build();
 
-        o = ocorrenciaRepository.save(o);
-        return toResponse(o);
+        // Associa usuario autenticado
+        String emailAutenticado = SecurityContextHolder.getContext().getAuthentication().getName();
+        usuarioRepository.findByEmail(emailAutenticado).ifPresent(o::setUsuario);
+
+        return toResponse(ocorrenciaRepository.save(o));
     }
 
     public OcorrenciaResponseDTO atualizar(UUID id, OcorrenciaRequestDTO dto) {
-        return ocorrenciaRepository.findById(id).map(o -> {
-            o.setTitulo(dto.titulo());
-            o.setDescricao(dto.descricao());
-            o.setLatitude(dto.latitude());
-            o.setLongitude(dto.longitude());
-            tipoOcorrenciaRepository.findById(dto.tipoOcorrenciaId()).ifPresent(o::setTipoOcorrencia);
-            zonaRiscoRepository.findById(dto.zonaRiscoId()).ifPresent(o::setZonaRisco);
-            ocorrenciaRepository.save(o);
-            return toResponse(o);
-        }).orElse(null);
+        var o = findOrThrow(id);
+        o.setTitulo(dto.titulo());
+        o.setDescricao(dto.descricao());
+        o.setLocalizacao(new Localizacao(dto.latitude(), dto.longitude()));
+        tipoOcorrenciaRepository.findById(dto.tipoOcorrenciaId()).ifPresent(o::setTipoOcorrencia);
+        zonaRiscoRepository.findById(dto.zonaRiscoId()).ifPresent(o::setZonaRisco);
+        return toResponse(ocorrenciaRepository.save(o));
     }
 
     public OcorrenciaResponseDTO alterarStatus(UUID id, StatusOcorrencia status) {
-        return ocorrenciaRepository.findById(id).map(o -> {
-            o.setStatus(status);
-            if (status == StatusOcorrencia.RESOLVIDA) o.setResolvidoEm(LocalDateTime.now());
-            ocorrenciaRepository.save(o);
-            return toResponse(o);
-        }).orElse(null);
+        var o = findOrThrow(id);
+        o.setStatus(status);
+        if (status == StatusOcorrencia.RESOLVIDA) o.setResolvidoEm(LocalDateTime.now());
+        return toResponse(ocorrenciaRepository.save(o));
+    }
+
+    public void deletar(UUID id) {
+        findOrThrow(id);
+        ocorrenciaRepository.deleteById(id);
+    }
+
+    private Ocorrencia findOrThrow(UUID id) {
+        return ocorrenciaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ocorrencia nao encontrada: " + id));
     }
 
     private OcorrenciaResponseDTO toResponse(Ocorrencia o) {
-        return new OcorrenciaResponseDTO(o.getId(), o.getTitulo(), o.getDescricao(), o.getStatus(), o.getDataCriacao());
+        Double lat = o.getLocalizacao() != null ? o.getLocalizacao().getLatitude() : null;
+        Double lon = o.getLocalizacao() != null ? o.getLocalizacao().getLongitude() : null;
+        return new OcorrenciaResponseDTO(
+                o.getId(), o.getTitulo(), o.getDescricao(), o.getStatus(),
+                o.getTipoOcorrencia() != null ? o.getTipoOcorrencia().getId() : null,
+                o.getTipoOcorrencia() != null ? o.getTipoOcorrencia().getNome() : null,
+                o.getZonaRisco() != null ? o.getZonaRisco().getId() : null,
+                o.getZonaRisco() != null ? o.getZonaRisco().getNome() : null,
+                o.getUsuario() != null ? o.getUsuario().getId() : null,
+                lat, lon, o.getDataCriacao(), o.getResolvidoEm());
     }
 }

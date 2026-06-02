@@ -1,6 +1,7 @@
 package br.com.fiap.java.ArgosApi.dto.response;
 
 import br.com.fiap.java.ArgosApi.entity.StatusOcorrencia;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -9,6 +10,13 @@ public record OcorrenciaResponseDTO(
         String titulo,
         String descricao,
         StatusOcorrencia status,
-        LocalDateTime dataCriacao
-) {
-}
+        UUID tipoOcorrenciaId,
+        String tipoOcorrenciaNome,
+        UUID zonaRiscoId,
+        String zonaRiscoNome,
+        UUID usuarioId,
+        Double latitude,
+        Double longitude,
+        LocalDateTime dataCriacao,
+        LocalDateTime resolvidoEm
+) {}

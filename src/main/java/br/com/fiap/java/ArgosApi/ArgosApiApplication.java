@@ -5,9 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class ArgosApiApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(ArgosApiApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(ArgosApiApplication.class, args);
+    }
 }

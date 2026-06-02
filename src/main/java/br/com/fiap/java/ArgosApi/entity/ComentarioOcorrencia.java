@@ -2,7 +2,7 @@ package br.com.fiap.java.ArgosApi.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,22 +16,25 @@ import java.util.UUID;
 public class ComentarioOcorrencia {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "id", updatable = false, nullable = false)
+    @GeneratedValue
+    @UuidGenerator
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
+    @Column(nullable = false)
     private String mensagem;
 
-    @ManyToOne
-    @JoinColumn(name = "ocorrencia_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ocorrencia_id", nullable = false)
     private Ocorrencia ocorrencia;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
     private LocalDateTime dataCriacao;
+
+    @Builder.Default
     private boolean ativo = true;
 
     @PrePersist

@@ -7,7 +7,7 @@ public record ComentarioResponseDTO(
         UUID id,
         String mensagem,
         UUID usuarioId,
+        String usuarioNome,
         UUID ocorrenciaId,
         LocalDateTime dataCriacao
-) {
-}
+) {}
