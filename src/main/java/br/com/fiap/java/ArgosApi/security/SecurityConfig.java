@@ -23,6 +23,7 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/",
+            "/status",
             "/hello",
             "/api/auth/**",
             "/h2-console/**",
