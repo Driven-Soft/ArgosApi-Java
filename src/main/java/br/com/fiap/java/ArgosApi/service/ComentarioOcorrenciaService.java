@@ -10,12 +10,14 @@ import br.com.fiap.java.ArgosApi.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ComentarioOcorrenciaService {
 
     private final ComentarioOcorrenciaRepository comentarioRepository;
@@ -25,11 +27,11 @@ public class ComentarioOcorrenciaService {
     public List<ComentarioResponseDTO> listarPorOcorrencia(UUID ocorrenciaId) {
         ocorrenciaRepository.findById(ocorrenciaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ocorrencia nao encontrada"));
-        // FIXED: query especifica por ocorrencia em vez de findAll + filter
         return comentarioRepository.findByOcorrenciaIdOrderByDataCriacaoAsc(ocorrenciaId)
                 .stream().map(this::toResponse).toList();
     }
 
+    @Transactional
     public ComentarioResponseDTO criar(UUID ocorrenciaId, ComentarioRequestDTO dto) {
         var ocorrencia = ocorrenciaRepository.findById(ocorrenciaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ocorrencia nao encontrada"));
@@ -39,7 +41,6 @@ public class ComentarioOcorrenciaService {
                 .ocorrencia(ocorrencia)
                 .build();
 
-        // Associa usuario autenticado
         String emailAutenticado = SecurityContextHolder.getContext().getAuthentication().getName();
         usuarioRepository.findByEmail(emailAutenticado).ifPresent(comentario::setUsuario);
 

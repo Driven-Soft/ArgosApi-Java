@@ -9,12 +9,14 @@ import br.com.fiap.java.ArgosApi.repository.UsuarioRepository;
 import br.com.fiap.java.ArgosApi.repository.ZonaRiscoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AlertaService {
 
     private final AlertaRepository alertaRepository;
@@ -29,6 +31,7 @@ public class AlertaService {
         return toResponse(findOrThrow(id));
     }
 
+    @Transactional
     public AlertaResponseDTO criar(AlertaRequestDTO dto) {
         var zona = zonaRiscoRepository.findById(dto.zonaRiscoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Zona de risco nao encontrada"));
@@ -49,6 +52,7 @@ public class AlertaService {
         return toResponse(alertaRepository.save(a));
     }
 
+    @Transactional
     public AlertaResponseDTO atualizar(UUID id, AlertaRequestDTO dto) {
         var a = findOrThrow(id);
         a.setTitulo(dto.titulo());
@@ -56,21 +60,21 @@ public class AlertaService {
         a.setNivelAlerta(dto.nivelAlerta());
         a.setInicioVigencia(dto.inicioVigencia());
         a.setFimVigencia(dto.fimVigencia());
-
         zonaRiscoRepository.findById(dto.zonaRiscoId()).ifPresent(a::setZonaRisco);
         if (dto.usuarioCriadorId() != null) {
             usuarioRepository.findById(dto.usuarioCriadorId()).ifPresent(a::setUsuarioCriador);
         }
-
         return toResponse(alertaRepository.save(a));
     }
 
+    @Transactional
     public AlertaResponseDTO alterarStatus(UUID id, boolean ativo) {
         var a = findOrThrow(id);
         a.setAtivo(ativo);
         return toResponse(alertaRepository.save(a));
     }
 
+    @Transactional
     public void deletar(UUID id) {
         findOrThrow(id);
         alertaRepository.deleteById(id);

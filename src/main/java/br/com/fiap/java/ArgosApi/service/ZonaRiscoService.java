@@ -9,6 +9,7 @@ import br.com.fiap.java.ArgosApi.repository.AnaliseRiscoRepository;
 import br.com.fiap.java.ArgosApi.repository.ZonaRiscoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ZonaRiscoService {
 
     private final ZonaRiscoRepository zonaRiscoRepository;
@@ -35,6 +37,7 @@ public class ZonaRiscoService {
         return findOrThrow(id);
     }
 
+    @Transactional
     public ZonaRiscoResponseDTO criar(ZonaRiscoRequestDTO dto) {
         var z = ZonaRisco.builder()
                 .nome(dto.nome())
@@ -46,6 +49,7 @@ public class ZonaRiscoService {
         return toResponse(zonaRiscoRepository.save(z));
     }
 
+    @Transactional
     public ZonaRiscoResponseDTO atualizar(UUID id, ZonaRiscoRequestDTO dto) {
         var z = findOrThrow(id);
         z.setNome(dto.nome());
@@ -56,17 +60,20 @@ public class ZonaRiscoService {
         return toResponse(zonaRiscoRepository.save(z));
     }
 
+    @Transactional
     public void deletar(UUID id) {
         findOrThrow(id);
         zonaRiscoRepository.deleteById(id);
     }
 
+    @Transactional
     public ZonaRiscoResponseDTO atualizarNivelRisco(UUID id, NivelRisco nivel) {
         var z = findOrThrow(id);
         z.setNivelRiscoAtual(nivel);
         return toResponse(zonaRiscoRepository.save(z));
     }
 
+    @Transactional
     public Map<String, Object> analisarRisco(UUID id) {
         var z = findOrThrow(id);
         double chuva = rainMonitoringService.getRainMm(

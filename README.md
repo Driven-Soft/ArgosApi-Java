@@ -20,7 +20,7 @@ Integra dados de chuva em tempo real via **Open-Meteo** e imagens de satélite v
 
 | Recurso | URL |
 |---|---|
-| **Deploy (Render)** | https://argosapi-java.onrender.com |
+| **Deploy (Render)** | https://argosapi-java.onrender.com/ |
 | **Swagger UI** | https://argosapi-java.onrender.com/swagger-ui.html |
 | **API Docs (JSON)** | https://argosapi-java.onrender.com/v3/api-docs |
 | **Vídeo de Apresentação** | `https://youtube.com/` ← substituir |
