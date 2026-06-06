@@ -20,7 +20,7 @@ Integra dados de chuva em tempo real via **Open-Meteo** e imagens de satélite v
 
 | Recurso | URL |
 |---|---|
-| **Deploy (Render)** | https://argosapi-java.onrender.com/hello |
+| **Deploy (Render)** | https://argosapi-java.onrender.com |
 | **Swagger UI** | https://argosapi-java.onrender.com/swagger-ui.html |
 | **API Docs (JSON)** | https://argosapi-java.onrender.com/v3/api-docs |
 | **Vídeo de Apresentação** | `https://youtube.com/` ← substituir |
@@ -32,7 +32,8 @@ Integra dados de chuva em tempo real via **Open-Meteo** e imagens de satélite v
 - Java 21
 - Spring Boot 4.0.6
 - Spring Security + JWT (jjwt 0.11.5)
-- Spring Data JPA + H2 (dev) / Oracle (produção)
+- Spring Data JPA + H2 (ambiente atual)
+- Oracle Database (suportado para produção)
 - Spring HATEOAS
 - Springdoc OpenAPI 3 (Swagger)
 - Lombok

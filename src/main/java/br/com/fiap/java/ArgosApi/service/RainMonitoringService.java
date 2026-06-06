@@ -1,5 +1,6 @@
 package br.com.fiap.java.ArgosApi.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,27 +32,37 @@ public class RainMonitoringService {
                     apiUrl, latitude, longitude));
 
             var request = HttpRequest.newBuilder(uri)
-                    .GET().header("Accept", "application/json").build();
+                    .GET()
+                    .header("Accept", "application/json")
+                    .build();
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
             if (response.statusCode() != 200) return 0.0;
 
             var apiResponse = objectMapper.readValue(response.body(), OpenMeteoResponse.class);
+
             if (apiResponse.daily == null
                     || apiResponse.daily.precipitation_sum == null
                     || apiResponse.daily.precipitation_sum.isEmpty()) return 0.0;
 
-            Double value = apiResponse.daily.precipitation_sum.get(0);
+            // Pega o valor mais recente (ultimo da lista = hoje ou ontem)
+            Double value = apiResponse.daily.precipitation_sum
+                    .get(apiResponse.daily.precipitation_sum.size() - 1);
+
             return value != null ? value : 0.0;
+
         } catch (Exception ex) {
             return 0.0;
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true) // ignora latitude, longitude, timezone etc.
     private static class OpenMeteoResponse {
         public Daily daily;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true) // ignora "time" e outros campos
     private static class Daily {
         public List<Double> precipitation_sum;
     }

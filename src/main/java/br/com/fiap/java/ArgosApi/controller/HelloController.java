@@ -25,7 +25,7 @@ public class HelloController {
     @Operation(summary = "Status e informacoes gerais da API")
     public ResponseEntity<Map<String, Object>> status() {
         return ResponseEntity.ok(Map.of(
-                "api", "Argos API — DisasterWatch",
+                "api", "Argos API",
                 "versao", "v1.0",
                 "status", "online",
                 "timestamp", LocalDateTime.now().toString(),
