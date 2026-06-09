@@ -10,7 +10,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "analises_risco")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "tipo_analise", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "tipo_analise", discriminatorType = DiscriminatorType.STRING,
+        columnDefinition = "VARCHAR(31)")
 @DiscriminatorValue("BASICA")
 @Data
 @NoArgsConstructor
